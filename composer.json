@@ -19,7 +19,7 @@
         },
         {
             "name": "Sylvain Cyr"
-        },
+        }
     ],
     "require": {
         "php": "^7.1|^8.0",
