@@ -798,7 +798,6 @@ class PowerPoint2007 implements ReaderInterface
                 $pathImage = implode('/', $pathImage);
                 $imageFile = $this->oZip->getFromName($pathImage);
                 if (!empty($imageFile)) {
-                    echo $pathImage;
                     if ($oShape instanceof Gd) {
                         $info = getimagesizefromstring($imageFile);
                         $oShape->setMimeType($info['mime']);
@@ -1125,7 +1124,7 @@ class PowerPoint2007 implements ReaderInterface
             }
             $oElementSpacingBefore = $document->getElement('a:spcBef/a:spcPts', $oSubElement);
             if ($oElementSpacingBefore instanceof DOMElement) {
-                $oParagraph->setSpacingBefore($oElementSpacingBefore->getAttribute('val') / 100);
+                $oParagraph->setSpacingBefore(intval($oElementSpacingBefore->getAttribute('val') / 100));
             }
             $oElementSpacingAfter = $document->getElement('a:spcAft/a:spcPts', $oSubElement);
             if ($oElementSpacingAfter instanceof DOMElement) {
