@@ -7,6 +7,10 @@
 [![BountySource](https://img.shields.io/bountysource/team/phpoffice/activity.svg)](https://www.bountysource.com/teams/phpoffice)
 [![Join the chat at https://gitter.im/PHPOffice/PHPPresentation](https://img.shields.io/badge/Gitter-join%20chat-green.svg)](https://gitter.im/PHPOffice/PHPPresentation)
 
+This is a fork of the original PHPPresentation library so I can make changes to it. The main changes are:
+- bug fixes
+
+
 Branch Master : [![PHPPresentation](https://github.com/PHPOffice/PHPPresentation/actions/workflows/php.yml/badge.svg?branch=master)](https://github.com/PHPOffice/PHPPresentation/actions/workflows/php.yml)
 
 Branch Develop : [![PHPPresentation](https://github.com/PHPOffice/PHPPresentation/actions/workflows/php.yml/badge.svg?branch=develop)](https://github.com/PHPOffice/PHPPresentation/actions/workflows/php.yml)
