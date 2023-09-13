@@ -351,7 +351,7 @@ abstract class AbstractSlide extends AbstractDecoratorWriter
      * @param  int $shapeId
      * @throws \Exception
      */
-    protected function writeShapeTable(XMLWriter $objWriter, ShapeTable $shape, $shapeId)
+    protected function writeShapeTable(XMLWriter $objWriter, ShapeTable $shape, int $shapeId): void
     {
         // p:graphicFrame
         $objWriter->startElement('p:graphicFrame');
@@ -411,12 +411,12 @@ abstract class AbstractSlide extends AbstractDecoratorWriter
         $objWriter->startElement('a:tblGrid');
         // Write cell widths
         $countCells = count($shape->getRow(0)->getCells());
-        for ($cell = 0; $cell < $countCells; $cell++) {
+        for ($cell = 0; $cell < $countCells; ++$cell) {
             //  p:graphicFrame/a:graphic/a:graphicData/a:tbl/a:tblGrid/a:gridCol
             $objWriter->startElement('a:gridCol');
             // Calculate column width
             $width = $shape->getRow(0)->getCell($cell)->getWidth();
-            if ($width == 0) {
+            if (0 == $width) {
                 $colCount = count($shape->getRow(0)->getCells());
                 $totalWidth = $shape->getWidth();
                 $width = $totalWidth / $colCount;
@@ -427,33 +427,24 @@ abstract class AbstractSlide extends AbstractDecoratorWriter
         // p:graphicFrame/a:graphic/a:graphicData/a:tbl/a:tblGrid/
         $objWriter->endElement();
         // Colspan / rowspan containers
-        $colSpan = array();
-        $rowSpan = array();
+        $colSpan = $rowSpan = [];
         // Default border style
         $defaultBorder = new Border();
         // Write rows
         $countRows = count($shape->getRows());
-        echo "Shape ".$shapeId." count getRows ".$countRows.PHP_EOL;
-
-        for ($row = 0; $row < $countRows; $row++) {
+        for ($row = 0; $row < $countRows; ++$row) {
             // p:graphicFrame/a:graphic/a:graphicData/a:tbl/a:tr
             $objWriter->startElement('a:tr');
             $objWriter->writeAttribute('h', CommonDrawing::pixelsToEmu($shape->getRow($row)->getHeight()));
             // Write cells
             $countCells = count($shape->getRow($row)->getCells());
-            echo "Shape ".$shapeId." row ".$row." count cells ".$countCells.PHP_EOL;
-            for ($cell = 0; $cell < $countCells; $cell++) {
-                echo "Shape ".$shapeId." row ".$row." idx cell ".$cell.PHP_EOL;
+            for ($cell = 0; $cell < $countCells; ++$cell) {
                 // Current cell
                 $currentCell = $shape->getRow($row)->getCell($cell);
                 // Next cell right
-                $nextCellRight = $shape->getRow($row)->getCell($cell + 1, true);
+                $hasNextCellRight = $shape->getRow($row)->hasCell($cell + 1);
                 // Next cell below
-                $nextRowBelow = $shape->getRow($row + 1, true);
-                $nextCellBelow = null;
-                if ($nextRowBelow != null) {
-                    $nextCellBelow = $nextRowBelow->getCell($cell, true);
-                }
+                $hasNextRowBelow = $shape->hasRow($row + 1);
                 // a:tc
                 $objWriter->startElement('a:tc');
                 // Colspan
@@ -461,7 +452,7 @@ abstract class AbstractSlide extends AbstractDecoratorWriter
                     $objWriter->writeAttribute('gridSpan', $currentCell->getColSpan());
                     $colSpan[$row] = $currentCell->getColSpan() - 1;
                 } elseif (isset($colSpan[$row]) && $colSpan[$row] > 0) {
-                    $colSpan[$row]--;
+                    --$colSpan[$row];
                     $objWriter->writeAttribute('hMerge', '1');
                 }
                 // Rowspan
@@ -469,7 +460,7 @@ abstract class AbstractSlide extends AbstractDecoratorWriter
                     $objWriter->writeAttribute('rowSpan', $currentCell->getRowSpan());
                     $rowSpan[$cell] = $currentCell->getRowSpan() - 1;
                 } elseif (isset($rowSpan[$cell]) && $rowSpan[$cell] > 0) {
-                    $rowSpan[$cell]--;
+                    --$rowSpan[$cell];
                     $objWriter->writeAttribute('vMerge', '1');
                 }
                 // a:txBody
@@ -494,12 +485,12 @@ abstract class AbstractSlide extends AbstractDecoratorWriter
 
                 // Text Direction
                 $textDirection = $firstParagraphAlignment->getTextDirection();
-                if ($textDirection != Alignment::TEXT_DIRECTION_HORIZONTAL) {
+                if (Alignment::TEXT_DIRECTION_HORIZONTAL != $textDirection) {
                     $objWriter->writeAttribute('vert', $textDirection);
                 }
                 // Alignment (horizontal)
                 $verticalAlign = $firstParagraphAlignment->getVertical();
-                if ($verticalAlign != Alignment::VERTICAL_BASE && $verticalAlign != Alignment::VERTICAL_AUTO) {
+                if (Alignment::VERTICAL_BASE != $verticalAlign && Alignment::VERTICAL_AUTO != $verticalAlign) {
                     $objWriter->writeAttribute('anchor', $verticalAlign);
                 }
 
@@ -517,15 +508,18 @@ abstract class AbstractSlide extends AbstractDecoratorWriter
                 $borderDiagonalDown = $currentCell->getBorders()->getDiagonalDown();
                 $borderDiagonalUp = $currentCell->getBorders()->getDiagonalUp();
                 // Fix PowerPoint implementation
-                if (!is_null($nextCellRight)
-                    && $nextCellRight->getBorders()->getRight()->getHashCode() != $defaultBorder->getHashCode()
-                ) {
-                    $borderRight = $nextCellRight->getBorders()->getLeft();
+                if ($hasNextCellRight) {
+                    $nextCellRight = $shape->getRow($row)->getCell($cell + 1);
+                    if ($nextCellRight->getBorders()->getRight()->getHashCode() != $defaultBorder->getHashCode()) {
+                        $borderRight = $nextCellRight->getBorders()->getLeft();
+                    }
                 }
-                if (!is_null($nextCellBelow)
-                    && $nextCellBelow->getBorders()->getBottom()->getHashCode() != $defaultBorder->getHashCode()
-                ) {
-                    $borderBottom = $nextCellBelow->getBorders()->getTop();
+                if ($hasNextRowBelow) {
+                    $nextRowBelow = $shape->getRow($row + 1);
+                    $nextCellBelow = $nextRowBelow->getCell($cell);
+                    if ($nextCellBelow->getBorders()->getBottom()->getHashCode() != $defaultBorder->getHashCode()) {
+                        $borderBottom = $nextCellBelow->getBorders()->getTop();
+                    }
                 }
                 // Write borders
                 $this->writeBorder($objWriter, $borderLeft, 'L');
@@ -546,7 +540,6 @@ abstract class AbstractSlide extends AbstractDecoratorWriter
         $objWriter->endElement();
         $objWriter->endElement();
     }
-
     /**
      * Write paragraphs
      *
