@@ -433,13 +433,17 @@ abstract class AbstractSlide extends AbstractDecoratorWriter
         $defaultBorder = new Border();
         // Write rows
         $countRows = count($shape->getRows());
+        echo "Shape ".$shapeId." count getRows ".$countRows.PHP_EOL;
+
         for ($row = 0; $row < $countRows; $row++) {
             // p:graphicFrame/a:graphic/a:graphicData/a:tbl/a:tr
             $objWriter->startElement('a:tr');
             $objWriter->writeAttribute('h', CommonDrawing::pixelsToEmu($shape->getRow($row)->getHeight()));
             // Write cells
             $countCells = count($shape->getRow($row)->getCells());
+            echo "Shape ".$shapeId." row ".$row." count cells ".$countCells.PHP_EOL;
             for ($cell = 0; $cell < $countCells; $cell++) {
+                echo "Shape ".$shapeId." row ".$row." idx cell ".$cell.PHP_EOL;
                 // Current cell
                 $currentCell = $shape->getRow($row)->getCell($cell);
                 // Next cell right
